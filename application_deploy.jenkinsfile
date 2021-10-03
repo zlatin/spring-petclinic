@@ -6,7 +6,7 @@ pipeline{
             steps {
                 script{
                     withAWS(credentials: 'aws_login'){
-                        images = ecrListImages(repositoryName: 'petclinic')
+                        def images = ecrListImages(repositoryId: 'petclinic')
                         echo("${images}")
                     }
                 }
