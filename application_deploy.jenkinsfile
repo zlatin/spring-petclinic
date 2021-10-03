@@ -1,14 +1,22 @@
+def tags_list = []
+
+node('master'){
+    stage("Get list of builds in repository"){
+        def tags_list_text = sh script:"aws ecr list-images --repository-name petclinic --output text | awk '{print $3}'", returnStdout:true
+        tags_list = tags_list_text.trim().tokenize("\n")
+    }
+}
+
 pipeline{
     agent any
-
+    parameters{
+        choice(name: 'CHOICE', choices: tags_list, description: "Select build to deploy")
+    }
     stages{
         stage("Deploy artifact"){
             steps {
                 script{
-                    withAWS(credentials: 'aws_login'){
-                        def images = ecrListImages(repositoryName: 'petclinic', registryId: '353770932280')
-                        echo("${images}")
-                    }
+                    echo(message: "You selected ${params.CHOICE}")
                 }
             }
         }
