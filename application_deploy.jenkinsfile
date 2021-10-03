@@ -1,6 +1,11 @@
 def tags_list = []
 
 node('master'){
+    stage('Checkout') { 
+        steps { 
+            checkout scm
+        }
+    }
     stage("Get list of builds in repository"){
         def tags_list_text = sh script: "./list_tags.sh", returnStdout:true
         tags_list = tags_list_text.trim().tokenize("\n")
@@ -13,11 +18,7 @@ pipeline{
         choice(name: 'CHOICE', choices: tags_list, description: "Select build to deploy")
     }
     stages{
-        stage('Checkout') { 
-            steps { 
-               checkout scm
-            }
-        }
+
         stage("Deploy artifact"){
             steps {
                 script{
