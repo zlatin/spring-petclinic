@@ -17,6 +17,7 @@ pipeline {
                     dockerImage = docker.build("petshop")
                 }
             }
+        }
         stage("Publish Docker Image"){
             steps{
                 script {
@@ -26,6 +27,6 @@ pipeline {
                 }
             }
         }
-        }
+        
     }
 }
