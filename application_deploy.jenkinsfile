@@ -13,6 +13,11 @@ pipeline{
         choice(name: 'CHOICE', choices: tags_list, description: "Select build to deploy")
     }
     stages{
+        stage('Checkout') { 
+            steps { 
+               checkout scm
+            }
+        }
         stage("Deploy artifact"){
             steps {
                 script{
