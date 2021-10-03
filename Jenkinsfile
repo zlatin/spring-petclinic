@@ -14,7 +14,7 @@ pipeline {
         stage('Build Docker Image'){
             steps {
                 script {
-                    dockerImage = docker.build("petshop")
+                    dockerImage = docker.build("petclinic")
                 }
             }
         }
