@@ -1,0 +1,19 @@
+pipeline{
+    agent{
+        any
+    }
+
+    stages{
+        stage("Deploy artifact"){
+            steps {
+                script{
+                    withAWS(credentials: 'aws_creds'){
+                        images = ecrListImages(repositoryName: 'petclinic')
+                        echo("${images}")
+                    }
+                }
+            }
+        }
+    }
+
+}
