@@ -13,7 +13,7 @@ node('master'){
 pipeline{
     agent any
     parameters{
-        choice(name: 'CHOICE', choices: tags_list, description: "Select build to deploy")
+        choice(name: 'CHOICE', choices: tags_list_text, description: "Select build to deploy")
     }
     stages{
 
