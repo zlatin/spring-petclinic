@@ -1,4 +1,3 @@
-def tags_list_text = ''
 
 properties([
     parameters([
@@ -20,7 +19,7 @@ properties([
                     sandbox: true, 
                     script: """
                         def sout = new StringBuffer(), serr = new StringBuffer()
-                        def proc = 'aws ecr list-images --repository-name petclinic \
+                        def proc = '/bin/aws ecr list-images --repository-name petclinic \
                             ' --query "imageIds[*].imageTag" --output text \
                             ' --region us-east-1'.execute()
                         proc.consumeProcessOutput(sout, serr)
@@ -53,7 +52,7 @@ pipeline{
         stage("Deploy artifact"){
             steps {
                 script{
-                    echo(message: "You selected ${params.CHOICE}")
+                    echo(message: "You selected ${params.CHOICE1}")
                 }
             }
         }
