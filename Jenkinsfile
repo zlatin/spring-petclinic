@@ -21,7 +21,7 @@ pipeline {
         stage("Publish Docker Image"){
             steps{
                 script {
-                    docker.withRegistry("https://353770932280.dkr.ecr.us-east-1.amazonaws.com", "ecr:us-east-1:aws_cred") {
+                    docker.withRegistry("https://353770932280.dkr.ecr.us-east-1.amazonaws.com", "ecr:us-east-1:aws_log_pass") {
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
