@@ -1,19 +1,53 @@
 def tags_list_text = ''
 
-node('master'){
-    stage('Checkout') { 
-        checkout scm     
-    }
-    stage("Get list of builds in repository"){
-        tags_list_text = sh script: "./list_tags.sh", returnStdout:true
-    }
-}
+properties([
+    parameters([
+        [$class: 'ChoiceParameter', 
+            choiceType: 'PT_SINGLE_SELECT',
+            description: 'Select build to deploy',
+            filterLength: 1,
+            filterable: false,
+            name: 'CHOICE1',
+            randomName: 'choice-parameter-21337077649621572',
+            script: [$class: 'GroovyScript',
+                fallbackScript: [
+                    classpath: [], 
+                    sandbox: true, 
+                    script: 'return ["ERROR"]'
+                ],
+                script: [
+                    classpath: [], 
+                    sandbox: true, 
+                    script: """
+                        def sout = new StringBuffer(), serr = new StringBuffer()
+                        def proc = 'aws ecr list-images --repository-name petclinic \
+                            ' --query "imageIds[*].imageTag" --output text \
+                            ' --region us-east-1'.execute()
+                        proc.consumeProcessOutput(sout, serr)
+                        proc.waitForOrKill(10000)
+                        return sout.tokenize()'''
+
+                    """.stripIndent()
+                ]
+            ]
+        ]
+    ])
+])
+
+// node('master'){
+//     stage('Checkout') { 
+//         checkout scm     
+//     }
+//     stage("Get list of builds in repository"){
+//         tags_list_text = sh script: "./list_tags.sh", returnStdout:true
+//     }
+// }
 
 pipeline{
     agent any
-    parameters{
-        choice(name: 'CHOICE', choices: tags_list_text, description: "Select build to deploy")
-    }
+    // parameters{
+    //     choice(name: 'CHOICE', choices: tags_list_text, description: "Select build to deploy")
+    // }
     stages{
 
         stage("Deploy artifact"){
