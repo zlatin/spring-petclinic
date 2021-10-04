@@ -19,9 +19,7 @@ properties([
                     sandbox: true, 
                     script: """
                         def sout = new StringBuffer(), serr = new StringBuffer()
-                        def proc = '/bin/aws ecr list-images --repository-name petclinic \
-                            ' --query "imageIds[*].imageTag" --output text \
-                            ' --region us-east-1'.execute()
+                        def proc = '/bin/aws ecr list-images --repository-name petclinic --query "imageIds[*].imageTag" --output text --region us-east-1'.execute()
                         proc.consumeProcessOutput(sout, serr)
                         proc.waitForOrKill(10000)
                         return sout.tokenize()'''
