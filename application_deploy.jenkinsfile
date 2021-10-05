@@ -4,14 +4,13 @@ properties([
         [$class: 'ChoiceParameter', 
             choiceType: 'PT_SINGLE_SELECT',
             description: 'Select build to deploy',
-            filterLength: 1,
             filterable: false,
             name: 'BuildNumber',
-            randomName: 'choice-parameter-21337077649621572',
-            script: [$class: 'GroovyScript',
+            script: [
+                $class: 'GroovyScript',
                 fallbackScript: [
                     classpath: [], 
-                    sandbox: true, 
+                    sandbox: false, 
                     script: 'return ["ERROR"]'
                 ],
                 script: [
