@@ -16,7 +16,7 @@ properties([
                 ],
                 script: [
                     classpath: [], 
-                    sandbox: true, 
+                    sandbox: false, 
                     script: """
                         import groovy.json.JsonSlurperClassic
 
