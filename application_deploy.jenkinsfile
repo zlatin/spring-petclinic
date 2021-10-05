@@ -1,39 +1,39 @@
 
-properties([
-    parameters([
-        [$class: 'ChoiceParameter', 
-            choiceType: 'PT_SINGLE_SELECT',
-            description: 'Select build to deploy',
-            filterable: false,
-            name: 'BuildNumber',
-            script: [
-                $class: 'GroovyScript',
-                fallbackScript: [
-                    classpath: [], 
-                    sandbox: false, 
-                    script: 'return ["ERROR"]'
-                ],
-                script: [
-                    classpath: [], 
-                    sandbox: false, 
-                    script: """
-                        import groovy.json.JsonSlurperClassic
+// properties([
+//     parameters([
+//         [$class: 'ChoiceParameter', 
+//             choiceType: 'PT_SINGLE_SELECT',
+//             description: 'Select build to deploy',
+//             filterable: false,
+//             name: 'BuildNumber',
+//             script: [
+//                 $class: 'GroovyScript',
+//                 fallbackScript: [
+//                     classpath: [], 
+//                     sandbox: false, 
+//                     script: 'return ["ERROR"]'
+//                 ],
+//                 script: [
+//                     classpath: [], 
+//                     sandbox: false, 
+//                     script: """
+//                         import groovy.json.JsonSlurperClassic
 
-                        // Get all images with tags as JSON, the --filter is very important to get only images that have a tag
-                        def cmd = "aws ecr describe-images --repository-name petclinic --query 'sort_by(imageDetails,& imagePushedAt)[::-1].imageTags' --output text"
-                        def ecr_images_tags_text = cmd.execute()
-                        // Prepare the results list
-                        def ecr_images = ecr_images_tags_text.tokenize("\\n");
+//                         // Get all images with tags as JSON, the --filter is very important to get only images that have a tag
+//                         def cmd = "aws ecr describe-images --repository-name petclinic --query 'sort_by(imageDetails,& imagePushedAt)[::-1].imageTags' --output text"
+//                         def ecr_images_tags_text = cmd.execute()
+//                         // Prepare the results list
+//                         def ecr_images = ecr_images_tags_text.split("\\n");
 
                     
-                        return ecr_images
+//                         return ecr_images
 
-                    """.stripIndent()
-                ]
-            ]
-        ]
-    ])
-])
+//                     """.stripIndent()
+//                 ]
+//             ]
+//         ]
+//     ])
+// ])
 
 pipeline{
     agent any
