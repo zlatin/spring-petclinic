@@ -20,19 +20,12 @@ properties([
                         import groovy.json.JsonSlurperClassic
 
                         // Get all images with tags as JSON, the --filter is very important to get only images that have a tag
-                        def cmd = "aws ecr describe-images --repository-name petclinic --region us-east-1 --query 'reverse(sort_by(imageDetails,& imagePushedAt))[*]'"
-                        def ecr_images_json = cmd.execute()
-
-                        // Parse JSON into Groovy object
-                        def data = new JsonSlurperClassic().parseText(ecr_images_json.text)
-
+                        def cmd = "aws ecr describe-images --repository-name petclinic --query 'sort_by(imageDetails,& imagePushedAt)[::-1].imageTags' --output text"
+                        def ecr_images_tags_text = cmd.execute()
                         // Prepare the results list
-                        def ecr_images = [];
+                        def ecr_images = ecr_images_tags_text.tokenize("\n");
 
-                        // Add all tags
-                        data.imageIds.each { ecr_images.push(it.imageTag) } 
-
-                        // Return the list for Jenkins "select-box"
+                    
                         return ecr_images
 
                     """.stripIndent()
