@@ -22,7 +22,7 @@ properties([
                         def proc = '/bin/aws ecr list-images --repository-name petclinic --query "imageIds[*].imageTag" --output text --region us-east-1'.execute()
                         proc.consumeProcessOutput(sout, serr)
                         proc.waitForOrKill(10000)
-                        return sout'''
+                        return sout.tokenize()
 
                     """.stripIndent()
                 ]
@@ -31,20 +31,8 @@ properties([
     ])
 ])
 
-// node('master'){
-//     stage('Checkout') { 
-//         checkout scm     
-//     }
-//     stage("Get list of builds in repository"){
-//         tags_list_text = sh script: "./list_tags.sh", returnStdout:true
-//     }
-// }
-
 pipeline{
     agent any
-    // parameters{
-    //     choice(name: 'CHOICE', choices: tags_list_text, description: "Select build to deploy")
-    // }
     stages{
 
         stage("Deploy artifact"){
