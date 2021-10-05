@@ -23,7 +23,7 @@ properties([
                         def cmd = "aws ecr describe-images --repository-name petclinic --query 'sort_by(imageDetails,& imagePushedAt)[::-1].imageTags' --output text"
                         def ecr_images_tags_text = cmd.execute()
                         // Prepare the results list
-                        def ecr_images = ecr_images_tags_text.tokenize('\\n');
+                        def ecr_images = ecr_images_tags_text.tokenize("\\n");
 
                     
                         return ecr_images
