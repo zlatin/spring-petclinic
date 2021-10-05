@@ -5,8 +5,8 @@ properties([
             choiceType: 'PT_SINGLE_SELECT',
             description: 'Select build to deploy',
             filterLength: 1,
-            filterable: true,
-            name: 'CHOICE1',
+            filterable: false,
+            name: 'BuildNumber',
             randomName: 'choice-parameter-21337077649621572',
             script: [$class: 'GroovyScript',
                 fallbackScript: [
@@ -18,11 +18,23 @@ properties([
                     classpath: [], 
                     sandbox: true, 
                     script: """
-                        def sout = new StringBuffer(), serr = new StringBuffer()
-                        def proc = '/bin/aws ecr list-images --repository-name petclinic --query "imageIds[*].imageTag" --output text --region us-east-1'.execute()
-                        proc.consumeProcessOutput(sout, serr)
-                        proc.waitForOrKill(10000)
-                        return sout.tokenize()
+                        import groovy.json.JsonSlurperClassic
+
+                        // Get all images with tags as JSON, the --filter is very important to get only images that have a tag
+                        def cmd = "aws ecr list-images --repository-name petclinic --filter tagStatus=TAGGED --region us-east-1"
+                        def ecr_images_json = cmd.execute()
+
+                        // Parse JSON into Groovy object
+                        def data = new JsonSlurperClassic().parseText(ecr_images_json.text)
+
+                        // Prepare the results list
+                        def ecr_images = [];
+
+                        // Add all tags
+                        data.imageIds.each { ecr_images.push(it.imageTag) } 
+
+                        // Return the list for Jenkins "select-box"
+                        return ecr_images
 
                     """.stripIndent()
                 ]
@@ -38,7 +50,7 @@ pipeline{
         stage("Deploy artifact"){
             steps {
                 script{
-                    echo(message: "You selected ${params.CHOICE1}")
+                    echo(message: "You selected ${params.BuildNumber}")
                 }
             }
         }
