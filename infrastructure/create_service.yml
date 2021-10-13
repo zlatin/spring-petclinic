@@ -1,0 +1,90 @@
+- name: Deploy petclinic
+  hosts: 127.0.0.1
+  connection: local
+  vars:
+    service_name: petclinic
+    build_id: "5"
+    image: "jbrisbin/spring-petclinic"
+  tasks:
+    - name: Gather public subnets info
+      amazon.aws.ec2_vpc_subnet_info:
+        filters:
+          "tag:Name": "{{ item }}"
+      loop:
+        - Petclinic Public Subnet (AZ1)
+        - Petclinic Public Subnet (AZ2)
+      register: subnet_info
+
+    - name: Create task definition
+      community.aws.ecs_taskdefinition:
+        family: "{{ service_name }}-{{ build_id }}"
+        containers:
+          - name: "{{ service_name }}-{{ build_id }}"
+            essential: true
+            image: "{{ image }}"
+            portMappings:
+              - containerPort: 8080
+        memory: "250"
+        state: present
+
+    - name: Create target group
+      community.aws.elb_target_group:
+        name: "{{ service_name }}-{{ build_id }}"
+        protocol: http
+        port: 80
+        vpc_id: "{{ subnet_info.results[0].subnets[0].vpc_id }}"
+        state: present
+        healthy_threshold_count: 2
+        health_check_interval: 8
+      register: target_group
+
+    - name: Create ALB
+      community.aws.elb_application_lb:
+        name: "{{ service_name }}-{{ build_id }}"
+        security_groups:
+          - alb-sg
+        subnets: "{{ subnet_info.results | sum(attribute='subnets', start=[]) | map(attribute='id') | list }}"
+        listeners:
+          - Protocol: HTTP
+            Port: 80
+            DefaultActions:
+              - Type: forward
+                TargetGroupName: "{{ service_name }}-{{ build_id }}"
+            Rules:
+              - Conditions:
+                  - Field: path-pattern
+                    Values:
+                      - "/*"
+                Actions:
+                  - Type: forward
+                    TargetGroupName: "{{ service_name }}-{{ build_id }}"
+                Priority: "1"
+        state: present
+      register: alb_info
+
+    - name: Create ecs service
+      community.aws.ecs_service:
+        state: present
+        name: "{{ service_name }}-{{ build_id }}"
+        cluster: Petclinic
+        task_definition: "{{ service_name }}-{{ build_id }}"
+        desired_count: 3
+        role: ecs-service-Petclinic
+        load_balancers:
+          - containerName: "{{ service_name }}-{{ build_id }}"
+            containerPort: 8080
+            targetGroupArn: "{{ target_group.target_group_arn }}"
+
+    - name: Wait for target group to become available
+      uri:
+        url: "http://{{ alb_info.dns_name }}/"
+        method: GET
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 60
+      delay: 3
+
+    - name: Print ALB dns address
+      debug:
+        msg: "Address is: http://{{ alb_info.dns_name }}/"

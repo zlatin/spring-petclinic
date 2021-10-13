@@ -1,0 +1,57 @@
+- name: Deploy petclinic
+  hosts: 127.0.0.1
+  connection: local
+  vars:
+    service_name: petclinic
+    build_id: "5"
+    image: "jbrisbin/spring-petclinic"
+    cluster: Petclinic
+  tasks:
+    - name: get ecs service details
+      ecs_service_facts:
+        cluster: "{{ cluster }}"
+        service: "{{ service_name }}-{{ build_id }}"
+        details: true
+      register: ecs_service_facts_output
+
+    - name: set load balancers var
+      set_fact:
+        loadbalancers: "{{ ecs_service_facts_output.services[0].loadBalancers }}"
+      when: ecs_service_facts_output.services | count
+
+    - name: Destroy ALB
+      community.aws.elb_application_lb:
+        name: "{{ service_name }}-{{ build_id }}"
+        state: absent
+
+    - name: Destroy target group
+      community.aws.elb_target_group:
+        name: "{{ service_name }}-{{ build_id }}"
+        state: absent
+    
+    - name: Scale down service to 0
+      community.aws.ecs_service:
+        state: present
+        name: "{{ service_name }}-{{ build_id }}"
+        cluster: "{{ cluster }}"
+        task_definition: "{{ service_name }}-{{ build_id }}"
+        desired_count: 0
+        load_balancers: "{{ loadbalancers }}"
+
+    - name: Remove service
+      community.aws.ecs_service:
+        name: "{{ service_name }}-{{ build_id }}"
+        cluster: "{{ cluster }}"
+        desired_count: 0
+        state: absent
+
+    - name: Remove task definition
+      community.aws.ecs_taskdefinition:
+        family: "{{ service_name }}-{{ build_id }}"
+        containers:
+          - name: "{{ service_name }}-{{ build_id }}"
+            essential: true
+            image: "{{ image }}"
+            portMappings:
+              - containerPort: 8080
+        state: absent
