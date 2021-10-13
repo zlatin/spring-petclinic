@@ -44,14 +44,3 @@
         cluster: "{{ cluster }}"
         desired_count: 0
         state: absent
-
-    - name: Remove task definition
-      community.aws.ecs_taskdefinition:
-        family: "{{ service_name }}-{{ build_id }}"
-        containers:
-          - name: "{{ service_name }}-{{ build_id }}"
-            essential: true
-            image: "{{ image }}"
-            portMappings:
-              - containerPort: 8080
-        state: absent
