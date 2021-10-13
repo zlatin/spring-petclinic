@@ -44,7 +44,10 @@ pipeline {
                 }
             }
         }
-        stage('List ecr repositories') {
+        stage('Publish cervise to ECR') {
+            when {
+                branch 'main'
+            }
             environment {
                 LOCAL_AWS = credentials('aws_log_pass')
                 AWS_ACCESS_KEY_ID = "${LOCAL_AWS_USR}"
@@ -52,7 +55,7 @@ pipeline {
                 AWS_DEFAULT_REGION = 'us-east-1'
             }
             steps {
-                sh 'aws ecr describe-repositories'
+                sh "ansible-playbook ./infrastructure/create_service.yml -e 'service_name=petclinic build_id=${env.BUILD_NUMBER}' image='${env.ECR_REPSITORY}:${env.BUILD_NUMBER}'"
             }
         }
     }
