@@ -4,7 +4,6 @@
   vars:
     service_name: petclinic
     build_id: "5"
-    image: "jbrisbin/spring-petclinic"
     cluster: Petclinic
   tasks:
     - name: get ecs service details
