@@ -33,7 +33,7 @@ data "aws_ami" "ecs_ami" {
 
 resource "aws_launch_configuration" "ECSLaunchConfiguration" {
   image_id             = data.aws_ami.ecs_ami.image_id
-  instance_type        = "t2.micro"
+  instance_type        = "t3.medium"
   security_groups      = [aws_security_group.ECSHostSecurityGroup.id]
   iam_instance_profile = aws_iam_instance_profile.ECSInstanceProfile.name
   user_data            = <<EOF
