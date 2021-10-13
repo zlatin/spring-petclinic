@@ -45,8 +45,10 @@ pipeline {
             }
         }
         stage('List ecr repositories') {
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'aws_credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                AWS('--region=eu-east-1 ecr describe-repositories')
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'aws_credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    AWS('--region=eu-east-1 ecr describe-repositories')
+                }
             }
         }
     }
