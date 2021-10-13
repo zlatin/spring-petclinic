@@ -18,7 +18,10 @@ pipeline {
                 }
             }
         }
-        stage('Publish Docker Image') {
+        stage('Publish Docker Image from main branch') { \
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     docker.withRegistry('env.ECR_REPOSITORY', 'ecr:us-east-1:aws_credentials') {
@@ -27,9 +30,23 @@ pipeline {
                 }
             }
         }
+        stage('Publish Docker Image from other branches') { \
+            when {
+                not {
+                    branch 'main'
+                }
+            }
+            steps {
+                script {
+                    docker.withRegistry('env.ECR_REPOSITORY', 'ecr:us-east-1:aws_credentials') {
+                        dockerImage.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                    }
+                }
+            }
+        }
     }
     post {
-    // Clean after build
+        // Clean after build
         always {
             cleanWs(cleanWhenNotBuilt: false,
                     deleteDirs: true,
