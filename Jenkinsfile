@@ -4,7 +4,6 @@ pipeline {
         skipDefaultCheckout(true)
     }
     stages {
- 
         stage('Build') {
             steps {
                 cleanWs()
@@ -22,9 +21,8 @@ pipeline {
         stage('Publish Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://353770932280.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:aws_credentials') {
+                    docker.withRegistry('env.ECR_REPOSITORY', 'ecr:us-east-1:aws_credentials') {
                         dockerImage.push("${env.BUILD_NUMBER}")
-                        dockerImage.push 'latest'
                     }
                 }
             }
