@@ -1,20 +1,12 @@
 resource "aws_ecs_cluster" "ECSCluster" {
   name = "Petclinic"
-  # capacity_providers = [aws_ecs_capacity_provider.prov1.name]
 }
-
-# resource "aws_ecs_capacity_provider" "prov1" {
-#   name = "prov1"
-
-#   auto_scaling_group_provider {
-#     auto_scaling_group_arn = aws_autoscaling_group.ECSAutoScalingGroup.arn
-#   }
-# }
 
 resource "aws_autoscaling_group" "ECSAutoScalingGroup" {
 
   depends_on = [
-    aws_ecs_cluster.ECSCluster
+    aws_ecs_cluster.ECSCluster,
+    aws_launch_configuration.ECSLaunchConfiguration
   ]
   vpc_zone_identifier  = [aws_subnet.PrivateSubnet1.id, aws_subnet.PrivateSubnet2.id]
   launch_configuration = aws_launch_configuration.ECSLaunchConfiguration.name
@@ -44,7 +36,10 @@ resource "aws_launch_configuration" "ECSLaunchConfiguration" {
   instance_type        = "t2.micro"
   security_groups      = [aws_security_group.ECSHostSecurityGroup.id]
   iam_instance_profile = aws_iam_instance_profile.ECSInstanceProfile.name
-  user_data            = "echo ECS_CLUSTER=Petclinic >> /etc/ecs/ecs.config"
+  user_data            = <<EOF
+#!/bin/bash
+echo ECS_CLUSTER=Petclinic >> /etc/ecs/ecs.config
+EOF
 }
 
 resource "aws_iam_instance_profile" "ECSInstanceProfile" {
