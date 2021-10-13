@@ -1,11 +1,24 @@
 pipeline {
     agent any
+    environment {
+                LOCAL_AWS = credentials('aws_log_pass')
+                AWS_ACCESS_KEY_ID = "${LOCAL_AWS_USR}"
+                AWS_SECRET_ACCESS_KEY = "${LOCAL_AWS_PSW}"
+                AWS_DEFAULT_REGION = 'us-east-1'
+            }
     stages {
-        stage('Deploy artifact') {
+        stage('Deploy QA build') {
             steps {
                 script {
                     echo(message: "You selected ${params.BuildNumber}")
                 }
+                sh "ansible-playbook ./infrastructure/create_service.yml -e 'service_name=petclinic build_id=${params.BuildNumber} image=${env.ECR_REPOSITORY}:${params.BuildNumber}'"
+            }
+        }
+        stage('Destroy QA environment') {
+            steps {
+                input 'Destroy QA environment?'
+                sh "ansible-playbook ./infrastructure/destroy_service.yml -e 'service_name=petclinic build_id=${params.BuildNumber}'"
             }
         }
     }
