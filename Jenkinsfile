@@ -44,7 +44,7 @@ pipeline {
                 }
             }
         }
-        stage('Publish cervise to ECR') {
+        stage('Deploy servise to ECR') {
             when {
                 branch 'main'
             }
