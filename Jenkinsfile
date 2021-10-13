@@ -45,10 +45,14 @@ pipeline {
             }
         }
         stage('List ecr repositories') {
+            environment {
+                LOCAL_AWS = credentials('aws_log_pass')
+                AWS_ACCESS_KEY_ID = "${LOCAL_AWS_USR}"
+                AWS_SECRET_ACCESS_KEY = "${LOCAL_AWS_PSW}"
+                AWS_DEFAULT_REGION = 'us-east-1'
+            }
             steps {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'aws_log_pass', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    AWS('--region=eu-east-1 ecr describe-repositories')
-                }
+                sh 'aws ecr describe-repositories'
             }
         }
     }
