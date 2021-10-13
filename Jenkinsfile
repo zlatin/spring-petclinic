@@ -18,7 +18,7 @@ pipeline {
                 }
             }
         }
-        stage('Publish Docker Image from main branch') { \
+        stage('Publish Docker Image from main branch') {
             when {
                 branch 'main'
             }
@@ -30,7 +30,7 @@ pipeline {
                 }
             }
         }
-        stage('Publish Docker Image from other branches') { \
+        stage('Publish Docker Image from other branches') {
             when {
                 not {
                     branch 'main'
@@ -38,10 +38,15 @@ pipeline {
             }
             steps {
                 script {
-                    docker.withRegistry("http://${env.ECR_REPOSITORY}", 'ecr:us-east-1:aws_credentials') {
+                    docker.withRegistry("${env.ECR_REPOSITORY}", 'ecr:us-east-1:aws_credentials') {
                         dockerImage.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
                     }
                 }
+            }
+        }
+        stage('List ecr repositories') {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'aws_credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                AWS('--region=eu-east-1 ecr describe-repositories')
             }
         }
     }
