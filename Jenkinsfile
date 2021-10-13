@@ -24,7 +24,7 @@ pipeline {
             }
             steps {
                 script {
-                    docker.withRegistry('env.ECR_REPOSITORY', 'ecr:us-east-1:aws_credentials') {
+                    docker.withRegistry("http://${env.ECR_REPOSITORY}", 'ecr:us-east-1:aws_credentials') {
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
@@ -38,7 +38,7 @@ pipeline {
             }
             steps {
                 script {
-                    docker.withRegistry('env.ECR_REPOSITORY', 'ecr:us-east-1:aws_credentials') {
+                    docker.withRegistry("http://${env.ECR_REPOSITORY}", 'ecr:us-east-1:aws_credentials') {
                         dockerImage.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
                     }
                 }
