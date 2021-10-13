@@ -55,7 +55,7 @@ pipeline {
                 AWS_DEFAULT_REGION = 'us-east-1'
             }
             steps {
-                sh "ansible-playbook ./infrastructure/create_service.yml -e 'service_name=petclinic build_id=${env.BUILD_NUMBER} image=${env.ECR_REPOSITORY}:${env.BUILD_NUMBER}'"
+                sh "ansible-playbook ./infrastructure/create_service.yml -e 'service_name=petclinic build_id=latest image=${env.ECR_REPOSITORY}:${env.BUILD_NUMBER}'"
             }
         }
     }
